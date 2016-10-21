@@ -13,6 +13,8 @@ import net.mcjukebox.plugin.bukkit.utils.TimeUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.net.Socket;
+
 public class MCJukebox extends JavaPlugin {
 
     @Getter private static final boolean DEBUG = true;
@@ -26,11 +28,15 @@ public class MCJukebox extends JavaPlugin {
     @Getter private ShowManager showManager;
     @Getter private TimeUtils timeUtils;
 
+    public RegionManager getRegionManager() {
+        return regionManager;
+    }
+
     /**
      * Called when the plugin is first loaded by Spigot.
      */
     public void onEnable(){
-        this.instance = this;
+        instance = this;
 
         langManager = new LangManager();
         MessageUtils.setLangManager(langManager);
@@ -48,6 +54,30 @@ public class MCJukebox extends JavaPlugin {
 
         Bukkit.getPluginCommand("jukebox").setExecutor(new JukeboxCommand(regionManager));
         this.getLogger().info(this.getName() + " has been loaded!");
+    }
+
+    public static MCJukebox getInstance() {
+        return instance;
+    }
+
+    public RegionListener getRegionListener() {
+        return regionListener;
+    }
+
+    public LangManager getLangManager() {
+        return langManager;
+    }
+
+    public ShowManager getShowManager() {
+        return showManager;
+    }
+
+    public TimeUtils getTimeUtils() {
+        return timeUtils;
+    }
+
+    public SocketHandler getSocketHandler() {
+        return socketHandler;
     }
 
     public String getAPIKey() {

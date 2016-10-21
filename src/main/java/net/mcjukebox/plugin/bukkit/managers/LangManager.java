@@ -2,6 +2,7 @@ package net.mcjukebox.plugin.bukkit.managers;
 
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.Plugin;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Iterator;
@@ -33,13 +34,21 @@ public class LangManager {
 		JSONObject finalParent = keyValues;
 
 		for(int i = 0; i < elements.length - 1; i++){
-			if(!finalParent.has(elements[i])) finalParent.put(elements[i], new JSONObject());
-			finalParent = finalParent.getJSONObject(elements[i]);
+			try {
+				if (!finalParent.has(elements[i])) finalParent.put(elements[i], new JSONObject());
+				finalParent = finalParent.getJSONObject(elements[i]);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 		}
 
 		String value = null;
-		if(elements.length == 0 && finalParent.has(key)) value = finalParent.getString(key);
-		else if(finalParent.has(elements[elements.length - 1])) value = finalParent.getString(elements[elements.length - 1]);
+		try {
+			if(elements.length == 0 && finalParent.has(key)) value = finalParent.getString(key);
+			else if(finalParent.has(elements[elements.length - 1])) value = finalParent.getString(elements[elements.length - 1]);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 
 		if(value != null) return ChatColor.translateAlternateColorCodes('&', value);
 		return ChatColor.RED + "Missing Key: " + key;
@@ -75,12 +84,21 @@ public class LangManager {
 		JSONObject finalParent = keyValues;
 
 		for(int i = 0; i < elements.length - 1; i++){
+            try {
 			if(!finalParent.has(elements[i])) finalParent.put(elements[i], new JSONObject());
 			finalParent = finalParent.getJSONObject(elements[i]);
-		}
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
 
-		if(!finalParent.has(key) && elements.length == 0) finalParent.put(key, value);
-		else if(!finalParent.has(elements[elements.length - 1])) finalParent.put(elements[elements.length - 1], value);
+        try {
+            if (!finalParent.has(key) && elements.length == 0) finalParent.put(key, value);
+            else if (!finalParent.has(elements[elements.length - 1]))
+                finalParent.put(elements[elements.length - 1], value);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 	}
 
 }

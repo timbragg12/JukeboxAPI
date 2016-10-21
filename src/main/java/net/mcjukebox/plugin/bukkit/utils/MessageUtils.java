@@ -12,6 +12,10 @@ public class MessageUtils {
 
 	@Setter private static LangManager langManager;
 
+	public static void setLangManager(LangManager langManager1) {
+        langManager = langManager1;
+    }
+
 	/**
 	 * Sends a message to the given player.
 	 *

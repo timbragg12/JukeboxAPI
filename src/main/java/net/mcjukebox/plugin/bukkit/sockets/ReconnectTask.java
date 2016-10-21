@@ -13,6 +13,10 @@ public class ReconnectTask implements Runnable {
 	private int reconnectionFailures = 0;
 	@Setter private boolean reconnecting = true;
 
+	public void setReconnecting(boolean var) {
+		reconnecting = var;
+	}
+
 	public ReconnectTask(SocketHandler socketHandler) {
 		this.socketHandler = socketHandler;
 	}

@@ -5,6 +5,7 @@ import net.mcjukebox.plugin.bukkit.api.models.Media;
 import net.mcjukebox.plugin.bukkit.managers.shows.ShowManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class JukeboxAPI {
@@ -16,20 +17,24 @@ public class JukeboxAPI {
      * @param media The file which should be played
      */
     public static void play(Player player, final Media media){
-        final JSONObject params = new JSONObject();
-        params.put("username", player.getName());
-        params.put("url", media.getURL());
-        params.put("volume", media.getVolume());
-        params.put("looping", media.isLooping());
-        params.put("channel", media.getChannel());
-        if(media.getFadeDuration() != -1) params.put("fadeDuration", media.getFadeDuration());
-        if(media.getStartTime() != -1) params.put("startTime", media.getStartTime());
-        Bukkit.getScheduler().runTaskAsynchronously(MCJukebox.getInstance(), new Runnable() {
-            public void run() {
-                String channel = media.getType() == ResourceType.MUSIC ? "playMusic" : "playSound";
-                MCJukebox.getInstance().getSocketHandler().emit("command/" + channel, params);
-            }
-        });
+        try {
+            final JSONObject params = new JSONObject();
+            params.put("username", player.getName());
+            params.put("url", media.getURL());
+            params.put("volume", media.getVolume());
+            params.put("looping", media.isLooping());
+            params.put("channel", media.getChannel());
+            if (media.getFadeDuration() != -1) params.put("fadeDuration", media.getFadeDuration());
+            if (media.getStartTime() != -1) params.put("startTime", media.getStartTime());
+            Bukkit.getScheduler().runTaskAsynchronously(MCJukebox.getInstance(), new Runnable() {
+                public void run() {
+                    String channel = media.getType() == ResourceType.MUSIC ? "playMusic" : "playSound";
+                    MCJukebox.getInstance().getSocketHandler().emit("command/" + channel, params);
+                }
+            });
+        } catch (JSONException e) {
+        e.printStackTrace();
+    }
     }
 
     /**
@@ -49,6 +54,7 @@ public class JukeboxAPI {
      * @param fadeDuration Length of fade, use 0 to disable and -1 for default
      */
     public static void stopMusic(Player player, String channel, int fadeDuration){
+        try {
         final JSONObject params = new JSONObject();
         params.put("username", player.getName());
         params.put("channel", channel);
@@ -58,6 +64,9 @@ public class JukeboxAPI {
                 MCJukebox.getInstance().getSocketHandler().emit("command/stopMusic", params);
             }
         });
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -68,6 +77,7 @@ public class JukeboxAPI {
      * @param fadeDuration Length of fade, use 0 to disable and -1 for default
      */
     public static void stopAll(Player player, String channel, int fadeDuration) {
+        try {
         final JSONObject params = new JSONObject();
         params.put("username", player.getName());
         params.put("channel", channel);
@@ -77,6 +87,9 @@ public class JukeboxAPI {
                 MCJukebox.getInstance().getSocketHandler().emit("command/stopAll", params);
             }
         });
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
 	/**

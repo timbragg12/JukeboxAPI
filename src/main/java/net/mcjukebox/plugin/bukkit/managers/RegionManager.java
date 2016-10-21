@@ -13,6 +13,10 @@ public class RegionManager implements Listener {
     private HashMap<String, String> regions;
     private String folder;
 
+    public HashMap<String, String> getRegions() {
+        return regions;
+    }
+
     public RegionManager(){
         folder = MCJukebox.getInstance().getDataFolder() + "";
         load();

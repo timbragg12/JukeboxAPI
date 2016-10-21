@@ -8,6 +8,10 @@ public class DropListener implements Emitter.Listener {
 
 	@Setter private long lastDripSent;
 
+	public void setLastDripSent(long l) {
+		lastDripSent = l;
+	}
+
 	@Override
 	public void call(Object... objects) {
 		long roundTripTime = System.currentTimeMillis() - lastDripSent;

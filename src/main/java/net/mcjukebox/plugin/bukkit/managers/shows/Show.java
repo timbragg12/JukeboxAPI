@@ -6,6 +6,7 @@ import net.mcjukebox.plugin.bukkit.MCJukebox;
 import net.mcjukebox.plugin.bukkit.api.JukeboxAPI;
 import net.mcjukebox.plugin.bukkit.api.ResourceType;
 import net.mcjukebox.plugin.bukkit.api.models.Media;
+import net.mcjukebox.plugin.bukkit.events.ShowStartEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -31,7 +32,7 @@ public class Show {
 		JukeboxAPI.stopAll(player, channel, -1);
 	}
 
-	public void play(Media media) {
+	public void play(Media media, String name) {
 		media.setStartTime(MCJukebox.getInstance().getTimeUtils().currentTimeMillis());
 		media.setChannel(channel);
 
@@ -43,6 +44,7 @@ public class Show {
 			if(Bukkit.getPlayer(UUID) == null) continue;
 			JukeboxAPI.play(Bukkit.getPlayer(UUID), media);
 		}
+		Bukkit.getPluginManager().callEvent(new ShowStartEvent(name));
 	}
 
 	public void stopMusic() {

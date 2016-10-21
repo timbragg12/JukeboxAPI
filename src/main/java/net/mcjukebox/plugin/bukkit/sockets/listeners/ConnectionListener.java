@@ -19,6 +19,14 @@ public class ConnectionListener {
 	@Getter private ConnectionFailedListener connectionFailedListener;
 	@Getter private ConnectionSuccessListener connectionSuccessListener;
 
+	public ConnectionFailedListener getConnectionFailedListener() {
+		return connectionFailedListener;
+	}
+
+	public ConnectionSuccessListener getConnectionSuccessListener() {
+		return connectionSuccessListener;
+	}
+
 	private SocketHandler socketHandler;
 	private HashMap<String, List<JSONObject>> queue = new HashMap<String, List<JSONObject>>();
 	private boolean noConnectionWarned = false;

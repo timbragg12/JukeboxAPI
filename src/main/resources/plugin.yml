@@ -5,4 +5,5 @@ softdepend: [WorldGuard]
 
 commands:
   jukebox:
-    usage: /jukebox <music/sound> <player> {options}
+    description: Jukebox!
+    aliases: [audio]

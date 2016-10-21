@@ -16,6 +16,10 @@ public class KeyHandler {
 	private SocketHandler socketHandler;
 	@Getter private CommandSender currentlyTryingKey;
 
+	public CommandSender getCurrentlyTryingKey() {
+		return currentlyTryingKey;
+	}
+
 	public KeyHandler(SocketHandler socketHandler) {
 		this.socketHandler = socketHandler;
 	}

@@ -14,111 +14,122 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 
-@AllArgsConstructor
 public class JukeboxCommand implements CommandExecutor {
 
     private RegionManager regionManager;
 
+    public JukeboxCommand(RegionManager regionManager) {
+        this.regionManager = regionManager;
+    }
+
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
-        //If the user does not have permission to operate MCJukebox, simply send them the URL
-        if(!commandSender.hasPermission("jukeboxapi.admin")) return URL(commandSender);
+        if(command.getName().equalsIgnoreCase("jukebox")) {
+            //If the user does not have permission to operate MCJukebox, simply send them the URL
+            if (!commandSender.hasPermission("jukeboxapi.admin")) return URL(commandSender);
 
-        if(args.length == 2 && args[0].equalsIgnoreCase("setkey")) {
-            MCJukebox.getInstance().getSocketHandler().getKeyHandler().tryKey(commandSender, args[1]);
-            commandSender.sendMessage(ChatColor.GREEN + "Trying key...");
-            return true;
-        }
-
-        if(MCJukebox.getInstance().getAPIKey() == null) {
-            commandSender.sendMessage(ChatColor.RED + "No API Key set. Type /jukebox setkey <apikey>.");
-            commandSender.sendMessage(ChatColor.DARK_RED + "You can get this key from https://www.mcjukebox.net/admin");
-            return true;
-        }
-
-        //Region commands
-        if(args.length > 0 && args[0].equalsIgnoreCase("region")){
-
-            //Region add command
-            if(args.length == 4 && args[1].equalsIgnoreCase("add")){
-                MCJukebox.getInstance().getRegionManager().addRegion(args[2], args[3]);
-                MessageUtils.sendMessage(commandSender, "region.registered");
+            if (args.length == 2 && args[0].equalsIgnoreCase("setkey")) {
+                MCJukebox.getInstance().getSocketHandler().getKeyHandler().tryKey(commandSender, args[1]);
+                commandSender.sendMessage(ChatColor.GREEN + "Trying key...");
                 return true;
             }
 
-            //Region remove command
-            if(args.length == 3 && args[1].equalsIgnoreCase("remove")){
-                if(MCJukebox.getInstance().getRegionManager().hasRegion(args[2])){
-                    MCJukebox.getInstance().getRegionManager().removeRegion(args[2]);
-                    MessageUtils.sendMessage(commandSender, "region.unregistered");
-                }else{
-                    MessageUtils.sendMessage(commandSender, "region.notregistered");
+            if (MCJukebox.getInstance().getAPIKey() == null) {
+                commandSender.sendMessage(ChatColor.RED + "No API Key set. Type /jukebox setkey <apikey>.");
+                commandSender.sendMessage(ChatColor.DARK_RED + "You can get this key from https://www.mcjukebox.net/admin");
+                return true;
+            }
+
+            //Region commands
+            if (args.length > 0 && args[0].equalsIgnoreCase("region")) {
+
+                //Region add command
+                if (args.length == 4 && args[1].equalsIgnoreCase("add")) {
+                    MCJukebox.getInstance().getRegionManager().addRegion(args[2], args[3]);
+                    MessageUtils.sendMessage(commandSender, "region.registered");
+                    return true;
                 }
-                return true;
-            }
 
-            //Region list command
-            if(args.length == 2 && args[1].equalsIgnoreCase("list")) {
-                commandSender.sendMessage(ChatColor.GREEN + "Registered Regions (" + regionManager.getRegions().size() + "):");
-                for(String region : regionManager.getRegions().keySet()) {
-                    commandSender.sendMessage("");
-                    commandSender.sendMessage(ChatColor.GOLD + "Name: " + ChatColor.WHITE + region);
-                    commandSender.sendMessage(ChatColor.GOLD + "URL/Show: " + ChatColor.WHITE + regionManager.getRegions().get(region));
+                //Region remove command
+                if (args.length == 3 && args[1].equalsIgnoreCase("remove")) {
+                    if (MCJukebox.getInstance().getRegionManager().hasRegion(args[2])) {
+                        MCJukebox.getInstance().getRegionManager().removeRegion(args[2]);
+                        MessageUtils.sendMessage(commandSender, "region.unregistered");
+                    } else {
+                        MessageUtils.sendMessage(commandSender, "region.notregistered");
+                    }
+                    return true;
                 }
-                return true;
-            }
-        }
 
-        if(args.length == 4 && args[0].equalsIgnoreCase("show")){
-
-            if(Bukkit.getPlayer(args[2]) == null) {
-                MessageUtils.sendMessage(commandSender, "command.notOnline");
-                return true;
-            }
-
-            Show show = MCJukebox.getInstance().getShowManager().getShow(args[3]);
-            if(args[1].equalsIgnoreCase("add")) show.addMember(Bukkit.getPlayer(args[2]), false);
-            else if(args[1].equalsIgnoreCase("remove")) show.removeMember(Bukkit.getPlayer(args[2]));
-            else return help(commandSender);
-
-            return true;
-        }
-
-        //Audio commands
-        if(args.length >= 4){
-            if(args[0].equalsIgnoreCase("stop")) return stop(commandSender, args);
-            if(!args[0].equalsIgnoreCase("music") && !args[0].equalsIgnoreCase("sound")) return help(commandSender);
-
-            JSONObject options = JSONFromArgs(args, 3);
-            if(options == null) {
-                commandSender.sendMessage(ChatColor.RED + "Unable to parse options as JSON.");
-                return true;
+                //Region list command
+                if (args.length == 2 && args[1].equalsIgnoreCase("list")) {
+                    commandSender.sendMessage(ChatColor.GREEN + "Registered Regions (" + regionManager.getRegions().size() + "):");
+                    for (String region : regionManager.getRegions().keySet()) {
+                        commandSender.sendMessage("");
+                        commandSender.sendMessage(ChatColor.GOLD + "Name: " + ChatColor.WHITE + region);
+                        commandSender.sendMessage(ChatColor.GOLD + "URL/Show: " + ChatColor.WHITE + regionManager.getRegions().get(region));
+                    }
+                    return true;
+                }
             }
 
-            return play(commandSender, args, options);
-        }
-        else if(args.length == 3){
-            if(args[0].equalsIgnoreCase("stop")) return stop(commandSender, args);
-            //Attempt to run the music or sound effect specified
-            if(args[0].equalsIgnoreCase("music") | args[0].equalsIgnoreCase("sound")) return play(commandSender, args, null);
+            if (args.length == 4 && args[0].equalsIgnoreCase("show")) {
+
+                if (Bukkit.getPlayer(args[2]) == null) {
+                    MessageUtils.sendMessage(commandSender, "command.notOnline");
+                    return true;
+                }
+
+                Show show = MCJukebox.getInstance().getShowManager().getShow(args[3]);
+                if (args[1].equalsIgnoreCase("add")) show.addMember(Bukkit.getPlayer(args[2]), false);
+                else if (args[1].equalsIgnoreCase("remove")) show.removeMember(Bukkit.getPlayer(args[2]));
+                else return help(commandSender);
+
+                return true;
+            }
+
+            //Audio commands
+            if (args.length >= 4) {
+                if (args[0].equalsIgnoreCase("stop")) return stop(commandSender, args);
+                if (!args[0].equalsIgnoreCase("music") && !args[0].equalsIgnoreCase("sound"))
+                    return help(commandSender);
+
+                JSONObject options = JSONFromArgs(args, 3);
+                if (options == null) {
+                    commandSender.sendMessage(ChatColor.RED + "Unable to parse options as JSON.");
+                    return true;
+                }
+
+                return play(commandSender, args, options);
+            } else if (args.length == 3) {
+                if (args[0].equalsIgnoreCase("stop")) return stop(commandSender, args);
+                //Attempt to run the music or sound effect specified
+                if (args[0].equalsIgnoreCase("music") | args[0].equalsIgnoreCase("sound"))
+                    return play(commandSender, args, null);
+                else return help(commandSender);
+            } else if (args.length == 2) {
+                //Attempt to stop music for the specified player
+                if (args[0].equalsIgnoreCase("stop")) return stop(commandSender, args);
+                else return help(commandSender);
+            } else if (args.length == 0) return URL(commandSender);
             else return help(commandSender);
-        }else if(args.length == 2){
-            //Attempt to stop music for the specified player
-            if(args[0].equalsIgnoreCase("stop")) return stop(commandSender, args);
-            else return help(commandSender);
         }
-        else if(args.length == 0) return URL(commandSender);
-        else return help(commandSender);
+        return help(commandSender);
     }
 
     private boolean URL(CommandSender sender) {
+        try {
         MessageUtils.sendMessage(sender, "user.openLoading");
         JSONObject params = new JSONObject();
         params.put("username", sender.getName());
         MCJukebox.getInstance().getSocketHandler().emit("command/getToken", params);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         return true;
     }
 
@@ -148,7 +159,7 @@ public class JukeboxCommand implements CommandExecutor {
 
         if(args[1].toCharArray()[0] == '@') {
             Show show = MCJukebox.getInstance().getShowManager().getShow(args[1]);
-            show.play(media);
+            show.play(media, args[1]);
             return true;
         }
 
@@ -166,7 +177,8 @@ public class JukeboxCommand implements CommandExecutor {
 
     private boolean stop(CommandSender sender, String[] args){
         String scope = args.length >= 3 ? args[1] : "music";
-        JSONObject params = new JSONObject();
+        try {
+            JSONObject params = new JSONObject();
 
         if(args.length >= 4) {
             params = JSONFromArgs(args, 3);
@@ -203,6 +215,9 @@ public class JukeboxCommand implements CommandExecutor {
         if(scope.equalsIgnoreCase("music")) JukeboxAPI.stopMusic(playFor, channel, fadeDuration);
         else JukeboxAPI.stopAll(playFor, channel, fadeDuration);
 
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         return true;
     }
 

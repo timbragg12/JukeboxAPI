@@ -4,6 +4,7 @@ import net.mcjukebox.plugin.bukkit.MCJukebox;
 import net.mcjukebox.plugin.bukkit.api.ResourceType;
 import lombok.Getter;
 import lombok.Setter;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Media {
@@ -18,6 +19,26 @@ public class Media {
     @Getter @Setter private long startTime = -1;
     @Getter @Setter private String channel = "default";
 
+    public void setStartTime(long l) {
+        this.startTime = l;
+    }
+
+    public void setChannel(String s) {
+        this.channel = s;
+    }
+
+    public ResourceType getType() {
+        return type;
+    }
+
+    public void setType(ResourceType rt) {
+        this.type = rt;
+    }
+
+    public void setURL(String s) {
+        this.URL = s;
+    }
+
     public Media(ResourceType type, String URL) {
         setType(type);
         setURL(URL);
@@ -31,6 +52,7 @@ public class Media {
     }
 
     public void loadOptions(JSONObject options) {
+        try {
         if(options.has("volume")) {
             if(options.get("volume") instanceof Integer) {
                 if (options.getInt("volume") <= 100 && options.getInt("volume") >= 0) {
@@ -65,6 +87,9 @@ public class Media {
             if(options.get("channel") instanceof String) {
                 this.channel = options.getString("channel");
             }
+        }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 

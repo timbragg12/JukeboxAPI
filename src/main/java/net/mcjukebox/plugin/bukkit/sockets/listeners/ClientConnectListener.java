@@ -9,12 +9,14 @@ import net.mcjukebox.plugin.bukkit.managers.shows.ShowManager;
 import net.mcjukebox.plugin.bukkit.utils.MessageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ClientConnectListener implements Emitter.Listener {
 
 	@Override
 	public void call(Object... objects) {
+		try {
 		JSONObject data = (JSONObject) objects[0];
 		ClientConnectEvent event = new ClientConnectEvent(
 				data.getString("username"), data.getLong("timestamp"));
@@ -31,6 +33,9 @@ public class ClientConnectListener implements Emitter.Listener {
 			if(show.getCurrentTrack() != null)
 				JukeboxAPI.play(player, show.getCurrentTrack());
 		}
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 	}
 
 }
